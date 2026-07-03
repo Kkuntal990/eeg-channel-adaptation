@@ -30,6 +30,8 @@ import os
 import random
 from pathlib import Path
 
+_REPO = Path(__file__).resolve().parent.parent  # repo root
+
 import h5py
 import numpy as np
 import pytorch_lightning as pl
@@ -52,8 +54,8 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 # Paths
-DEFAULT_DATA_DIR = Path("/expanse/projects/nemar/kuntal/adapter_finetuning/data/interpolated")
-DEFAULT_OUTPUT_DIR = Path("/expanse/projects/nemar/kuntal/adapter_finetuning/results/interpolated")
+DEFAULT_DATA_DIR = (_REPO / "data/interpolated")
+DEFAULT_OUTPUT_DIR = (_REPO / "results/interpolated")
 
 # Dataset configs matching existing experiments
 DATASET_CONFIG = {
@@ -436,7 +438,7 @@ class BENDRInterpolateModule(pl.LightningModule):
             betas=(0.9, 0.999),
         )
 
-        import importlib.util; _s = importlib.util.spec_from_file_location("optim", "/expanse/projects/nemar/kuntal/adapter_finetuning/adapter_finetuning/optim.py"); _m = importlib.util.module_from_spec(_s); _s.loader.exec_module(_m); CosineAnnealingWarmupLR = _m.CosineAnnealingWarmupLR
+        import importlib.util; _s = importlib.util.spec_from_file_location("optim", str(_REPO / "adapter_finetuning/optim.py")); _m = importlib.util.module_from_spec(_s); _s.loader.exec_module(_m); CosineAnnealingWarmupLR = _m.CosineAnnealingWarmupLR
 
         scheduler = CosineAnnealingWarmupLR(
             optimizer,
@@ -801,8 +803,8 @@ def main():
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
     # Set environment variables for Expanse
-    os.environ.setdefault("TMPDIR", "/expanse/projects/nemar/eeg_finetuning/.cache/tmp")
-    os.environ.setdefault("HF_HOME", "/expanse/projects/nemar/eeg_finetuning/.cache/huggingface")
+    os.environ.setdefault("TMPDIR", str(_REPO / ".cache" / "tmp"))
+    os.environ.setdefault("HF_HOME", str(_REPO / ".cache" / "huggingface"))
     os.environ.setdefault("WANDB_MODE", "online")
 
     if args.slurm:

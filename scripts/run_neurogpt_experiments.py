@@ -68,10 +68,10 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 # Paths
-DEFAULT_NATIVE_DIR = Path("/expanse/projects/nemar/kuntal/adapter_finetuning/data/luna_native_raw")
-DEFAULT_INTERP_DIR = Path("/expanse/projects/nemar/kuntal/adapter_finetuning/data/interpolated_raw")
-DEFAULT_OMNEEG_DIR = Path("/expanse/projects/nemar/kuntal/adapter_finetuning/data/omneeg")
-DEFAULT_OUTPUT_DIR = Path("/expanse/projects/nemar/kuntal/adapter_finetuning/results/neurogpt")
+DEFAULT_NATIVE_DIR = (_REPO / "data/luna_native_raw")
+DEFAULT_INTERP_DIR = (_REPO / "data/interpolated_raw")
+DEFAULT_OMNEEG_DIR = (_REPO / "data/omneeg")
+DEFAULT_OUTPUT_DIR = (_REPO / "results/neurogpt")
 
 NEUROGPT_SFREQ = 250.0       # Neuro-GPT pretrained at 250 Hz
 NEUROGPT_N_CHANS = 22        # Fixed 22 channels
@@ -1117,8 +1117,8 @@ def main():
     args = parser.parse_args()
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
-    os.environ.setdefault("TMPDIR", "/expanse/projects/nemar/eeg_finetuning/.cache/tmp")
-    os.environ.setdefault("HF_HOME", "/expanse/projects/nemar/dtyoung/huggingface_cache")
+    os.environ.setdefault("TMPDIR", str(_REPO / ".cache" / "tmp"))
+    os.environ.setdefault("HF_HOME", str(_REPO / ".cache" / "huggingface"))
     os.environ.setdefault("WANDB_MODE", os.environ.get("WANDB_MODE", "offline"))
 
     if args.mode == "conv1d":

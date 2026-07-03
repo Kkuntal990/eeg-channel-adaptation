@@ -11,13 +11,38 @@ This repository implements a systematic benchmark of four channel adaptation met
 - **Datasets:** BCIC2A, PhysioNet MI, TUEV, FACED, MDD Mumtaz
 - **Training regimes:** Probe (frozen encoder) and SFT (supervised fine-tuning)
 
-## Installation
+## Quickstart
 
 ```bash
-conda create -y -n adapter-finetuning python=3.12 uv
-conda activate adapter-finetuning
-uv pip install -e .
+# 1. Create the conda env and install everything (one script, ~a few minutes)
+bash setup_env.sh                 # creates env "eeg-adapt"
+conda activate eeg-adapt
+
+# 2. Preprocess a dataset (BCIC2A / PhysioNet download automatically via MOABB)
+python scripts/preprocess_luna_native.py --dataset bcic2a
+
+# 3. Train — 1-batch smoke test first, then the real 15-seed run
+python scripts/run_eegpt_experiments.py --mode native --training-mode sft --dataset bcic2a --fast-dev-run
+python scripts/run_eegpt_experiments.py --mode native --training-mode sft --dataset bcic2a --n-seeds 15
 ```
+
+All script default paths are **repo-relative** (`data/` for inputs, `results/` for outputs, both git-ignored), so a fresh clone runs as-is — no path editing required.
+
+### Manual install (alternative to `setup_env.sh`)
+
+```bash
+conda create -y -n eeg-adapt python=3.12
+conda activate eeg-adapt
+pip install -e .
+# GPU: if torch can't see your GPU, install the matching build, e.g.
+# pip install torch --index-url https://download.pytorch.org/whl/cu121
+```
+
+### Data
+- **BCIC2A, PhysioNet** — auto-download via MOABB; nothing to do.
+- **TUEV, FACED, MDD** — not redistributable. Put the raw files under `data/raw/<dataset>/`
+  (or pass `--tuev-path` / edit the `data_root` default in the `load_*` functions of `scripts/preprocess_*.py`).
+- **Pretrained weights** — pulled automatically from the HuggingFace Hub on first run (cached in `.cache/`).
 
 ## Repository Structure
 
@@ -43,18 +68,29 @@ configs/                         # (placeholder; scripts are self-contained)
 
 ## Pipeline
 
-### 1. Preprocess (one-time per dataset)
+### 1. Preprocess (one-time per dataset; writes to `data/` by default)
 
 ```bash
-# Spherical spline interpolation to 10--20 montage (needed for SSI + Riemannian + BENDR)
-python scripts/preprocess_interpolate.py --output-dir $DATA_DIR/interpolated
+DS=bcic2a    # bcic2a | physionet | tuev | faced | mdd_mumtaz2016
 
-# Raw native channels in HDF5 (needed for EEGPT/LUNA/CBraMod native mode)
-python scripts/preprocess_luna_native.py --output-dir $DATA_DIR/luna_native
+# Native channels (EEGPT / LUNA native + every Conv1d run)
+python scripts/preprocess_luna_native.py --dataset $DS
+# Raw-µV native variant (CBraMod / Neuro-GPT native read this)
+python scripts/preprocess_luna_native.py --dataset $DS --normalization none --output-dir data/luna_native_raw
 
-# OmnEEG spherical harmonic coefficients (25 channels, topology-agnostic)
-python scripts/preprocess_omneeg.py --output-dir $DATA_DIR/omneeg --resolution 4
+# SSI (spherical spline to 10-20) and Riemannian re-centering
+python scripts/preprocess_interpolate.py --dataset $DS --method spline
+python scripts/preprocess_interpolate.py --dataset $DS --method spline --recenter riemannian
+# Raw variant for Neuro-GPT interpolated/riemannian (reads data/interpolated_raw)
+python scripts/preprocess_interpolate.py --dataset $DS --method spline --normalization none --output-dir data/interpolated_raw
+python scripts/preprocess_interpolate.py --dataset $DS --method spline --recenter riemannian --normalization none --output-dir data/interpolated_raw
+
+# OmnEEG spherical-harmonic coefficients (25 channels, topology-agnostic)
+python scripts/preprocess_omneeg.py --dataset $DS --resolution 4
 ```
+
+You only need the preprocessing variant(s) for the model/method you plan to run (e.g. for the
+Quickstart's *EEGPT native* you just need the first `preprocess_luna_native.py` line).
 
 ### 2. Run experiments
 

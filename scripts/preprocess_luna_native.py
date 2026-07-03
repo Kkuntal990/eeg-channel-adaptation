@@ -21,6 +21,8 @@ import argparse
 import logging
 from pathlib import Path
 
+_REPO = Path(__file__).resolve().parent.parent  # repo root
+
 import h5py
 import mne
 import numpy as np
@@ -31,8 +33,8 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
-DEFAULT_OUTPUT_DIR = Path("/expanse/projects/nemar/kuntal/adapter_finetuning/data/luna_native")
-DEFAULT_TUEV_PATH = "/expanse/projects/nemar/eeg_finetuning/data/tuh_eeg/tuh_eeg_events"
+DEFAULT_OUTPUT_DIR = (_REPO / "data/luna_native")
+DEFAULT_TUEV_PATH = str(_REPO / "data" / "raw" / "tuev")
 
 LUNA_SFREQ = 128.0  # LUNA's pretraining frequency
 
@@ -288,7 +290,7 @@ def load_tuev(tuev_path):
     return all_epochs, np.array(all_labels), np.array(all_subjects)
 
 
-def load_faced(data_root="/expanse/projects/nemar/eeg_finetuning/data/faced",
+def load_faced(data_root=str(_REPO / "data" / "raw" / "faced"),
                target_sfreq=200.0):
     """Load FACED emotion dataset from BIDS format.
 
@@ -415,7 +417,7 @@ def load_faced(data_root="/expanse/projects/nemar/eeg_finetuning/data/faced",
     return all_epochs, np.array(all_labels), np.array(all_subjects)
 
 
-def load_isruc_sleep(data_root="/expanse/projects/nemar/eeg_finetuning/data/isruc-sleep",
+def load_isruc_sleep(data_root=str(_REPO / "data" / "raw" / "isruc-sleep"),
                      target_sfreq=200.0):
     """Load ISRUC-Sleep dataset from BIDS format.
 
@@ -544,7 +546,7 @@ def load_isruc_sleep(data_root="/expanse/projects/nemar/eeg_finetuning/data/isru
     return all_epochs, np.array(all_labels), np.array(all_subjects)
 
 
-def load_mdd_mumtaz(data_root="/expanse/projects/nemar/eeg_finetuning/data_new/mdd_mumtaz2016",
+def load_mdd_mumtaz(data_root=str(_REPO / "data" / "raw" / "mdd_mumtaz2016"),
                     target_sfreq=200.0):
     """Load MDD Mumtaz 2016 dataset from BIDS format.
 

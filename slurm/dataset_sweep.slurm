@@ -7,27 +7,26 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
 #SBATCH --time=00:30:00
-#SBATCH --account=ddp483
-#SBATCH --output=/expanse/projects/nemar/kuntal/adapter_finetuning_submission/logs/ds_sweep_%A_%a.out
-#SBATCH --error=/expanse/projects/nemar/kuntal/adapter_finetuning_submission/logs/ds_sweep_%A_%a.err
+#SBATCH --account=CHANGE_ME        # <-- set your SLURM allocation
+#SBATCH --output=logs/ds_sweep_%A_%a.out
+#SBATCH --error=logs/ds_sweep_%A_%a.err
 #SBATCH --array=0-4
 
-REPO=/expanse/projects/nemar/kuntal/adapter_finetuning_submission
-DATA=/expanse/projects/nemar/kuntal/adapter_finetuning/data
-OMNEEG_DATA=/expanse/projects/nemar/adapter_finetuning/data/omneeg
+REPO="$(cd "$(dirname "$0")/.." && pwd)"   # repo root (portable)
+DATA="$REPO/data"
+OMNEEG_DATA="$REPO/data/omneeg"
 
 cd $REPO
 mkdir -p logs
 
-module purge
-module load gpu
-module load cuda12.2/toolkit/12.2.2
-module load anaconda3/2021.05
-source activate /expanse/projects/nemar/dtyoung/conda_envs/adapter-finetuning
+# --- cluster-specific: adjust module loads for your site ---
+module purge 2>/dev/null || true
+module load gpu cuda anaconda3 2>/dev/null || true
+source activate eeg-adapt   # env created by setup_env.sh
 
-export HF_HOME="/expanse/projects/nemar/dtyoung/huggingface_cache"
-export MNE_DATA="/expanse/projects/nemar/dtyoung/mne_data"
-export TMPDIR="/expanse/projects/nemar/eeg_finetuning/.cache/tmp"
+export HF_HOME="$REPO/.cache/huggingface"
+export MNE_DATA="$REPO/.cache/mne_data"
+export TMPDIR="$REPO/.cache/tmp"
 export WANDB_MODE=offline
 export PYTHONPATH=$REPO:$PYTHONPATH
 

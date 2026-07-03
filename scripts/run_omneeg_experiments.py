@@ -26,7 +26,10 @@ import argparse
 import logging
 import os
 import random
+import sys
 from pathlib import Path
+
+_REPO = Path(__file__).resolve().parent.parent  # repo root
 
 import h5py
 import numpy as np
@@ -49,8 +52,8 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 # Paths
-DEFAULT_DATA_DIR = Path("/expanse/projects/nemar/kuntal/adapter_finetuning/data/omneeg")
-DEFAULT_OUTPUT_DIR = Path("/expanse/projects/nemar/kuntal/adapter_finetuning/results/omneeg")
+DEFAULT_DATA_DIR = (_REPO / "data/omneeg")
+DEFAULT_OUTPUT_DIR = (_REPO / "results/omneeg")
 
 # Dataset configs matching existing experiments
 DATASET_CONFIG = {
@@ -640,8 +643,8 @@ def submit_slurm_jobs(
     """Submit OmnEEG experiments as SLURM jobs via submitit."""
     import submitit
 
-    PROJECT_ROOT = Path("/expanse/projects/nemar/kuntal/adapter_finetuning")
-    PYTHON = "/expanse/projects/nemar/dtyoung/conda_envs/adapter-finetuning/bin/python"
+    PROJECT_ROOT = _REPO
+    PYTHON = sys.executable
 
     executor_config = {
         "slurm_partition": "gpu-shared",
@@ -747,8 +750,8 @@ def main():
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
     # Set environment variables for Expanse
-    os.environ.setdefault("TMPDIR", "/expanse/projects/nemar/eeg_finetuning/.cache/tmp")
-    os.environ.setdefault("HF_HOME", "/expanse/projects/nemar/eeg_finetuning/.cache/huggingface")
+    os.environ.setdefault("TMPDIR", str(_REPO / ".cache" / "tmp"))
+    os.environ.setdefault("HF_HOME", str(_REPO / ".cache" / "huggingface"))
     os.environ.setdefault("WANDB_MODE", "online")
 
     if args.slurm:
