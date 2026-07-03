@@ -40,6 +40,8 @@ import sys
 import warnings
 from pathlib import Path
 
+_REPO = Path(__file__).resolve().parent.parent  # repo root
+
 import h5py
 import numpy as np
 import pytorch_lightning as pl
