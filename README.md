@@ -1,6 +1,6 @@
 # Channel Adaptation for EEG Foundation Models
 
-Code for reproducing experiments in *"Matching EEG montages to foundation models: when learned projections, interpolation, and native handling each win"* (IEEE SMC 2026).
+Code for reproducing experiments in *"EEG Foundation Models Need Input Adaptation, but Fixed Channel Mappings Often Suffice"* 
 
 This repository implements a systematic benchmark of four channel adaptation methods across five pretrained EEG foundation models on five downstream tasks.
 
